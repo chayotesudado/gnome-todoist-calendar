@@ -41,3 +41,20 @@
 .todoist-calendar .check-box.todoist-p3:checked StIcon {
     border-color: transparent;
 }
+
+/* Day dots. The theme's dot sits 2px from the bottom of the day's circle and
+   runs into the ring a focused (just clicked) day draws, so these are the same
+   dot raised 3px (cy 25 of 32, against the theme's 28). Light and dark match
+   the theme's calendar-today.svg and calendar-today-light.svg; the extension
+   sets .todoist-calendar-light from the shell's style variant. */
+.calendar.todoist-calendar-dots .calendar-day.calendar-day-with-events {
+    background-image: url("calendar-dot.svg");
+    background-size: contain;
+}
+.calendar.todoist-calendar-dots.todoist-calendar-light .calendar-day.calendar-day-with-events {
+    background-image: url("calendar-dot-light.svg");
+}
+/* Today's accent fill takes the light dot in both variants, as in the theme. */
+.calendar.todoist-calendar-dots .calendar-day.calendar-today.calendar-day-with-events {
+    background-image: url("calendar-dot.svg") !important;
+}

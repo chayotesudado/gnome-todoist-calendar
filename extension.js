@@ -25,7 +25,8 @@ import * as Token from './lib/token.js';
 //   lists overdue tasks too, as Todoist's Today view does. Ticking a task
 //   completes it in Todoist; any Todoist client (Planify, the Todoist app, the
 //   web) picks it up on its next sync. The card shows every task: the date
-//   menu's column scrolls if the list is taller than the screen.
+//   menu grows to fit the selected day's list, up to the screen height, then
+//   its column scrolls.
 //
 // Everything goes through the Todoist API with the user's API token. No
 // client's local data is read or written.
@@ -334,8 +335,7 @@ const TaskSection = GObject.registerClass({
         const cb = new CheckBox('');
         cb.x_expand = true;
         // CheckBox's inner box expands vertically, which would make the row
-        // soak up spare height when the date menu holds its size (it does
-        // while a day other than today is selected).
+        // soak up spare height whenever the card is taller than its list.
         cb.y_expand = false;
         cb.add_style_class_name(`todoist-p${5 - Math.min(4, Math.max(1, task.priority))}`);
         if (depth)
@@ -386,14 +386,34 @@ export default class TodoistCalendarExtension extends Extension {
         this._section = new TaskSection(this);
         dm._eventsItem.get_parent().insert_child_below(this._section, dm._eventsItem);
 
+        // While a day other than today is selected, the date menu freezes its
+        // size at today's (FreezableBinLayout), so a longer list for that day
+        // would be cut off and scroll. Unfreeze it so the menu fits the list.
+        // The menu hangs from the panel, so it only grows downward: the
+        // calendar doesn't move under the pointer.
+        this._menuLayout = dm._calendar.get_parent()?.get_parent()?.get_parent()?.layout_manager ?? null;
+        if (this._menuLayout && !('frozen' in this._menuLayout))
+            this._menuLayout = null;
+
+        // Our own day dots, set higher in the cell than the theme's so they
+        // clear the selected day's focus ring (see stylesheet.css).
+        dm._calendar.add_style_class_name('todoist-calendar-dots');
+        this._syncStyleVariant();
+
         // The date menu takes its event source from _getEventSource() each
         // time the session mode changes; answer with ours until disabled.
         dm._getEventSource = () => this._source;
         dm._sessionUpdated();
 
         this._signals = [
-            [dm._calendar, dm._calendar.connect('selected-date-changed', (_c, datetime) =>
-                this._section.setDate(new Date(datetime.to_unix() * 1000)))],
+            // Runs after the date menu's own handler, which sets the freeze.
+            [dm._calendar, dm._calendar.connect('selected-date-changed', (_c, datetime) => {
+                if (this._menuLayout)
+                    this._menuLayout.frozen = false;
+                this._section.setDate(new Date(datetime.to_unix() * 1000));
+            })],
+            [St.Settings.get(), St.Settings.get().connect('notify::color-scheme', () => this._syncStyleVariant())],
+            [Main.sessionMode, Main.sessionMode.connect('updated', () => this._syncStyleVariant())],
             [dm.menu, dm.menu.connect('open-state-changed', (_m, open) => this._onMenu(open))],
             [this.settings, this.settings.connect('changed::refresh-minutes', () => this._schedule())],
             [this.settings, this.settings.connect('changed::show-overdue', () => this._section.render())],
@@ -416,6 +436,10 @@ export default class TodoistCalendarExtension extends Extension {
         this._client.destroy();
         this._client = null;
 
+        this._dateMenu._calendar.remove_style_class_name('todoist-calendar-dots');
+        this._dateMenu._calendar.remove_style_class_name('todoist-calendar-light');
+        this._menuLayout = null;
+
         // Back to the stock Evolution Data Server source.
         delete this._dateMenu._getEventSource;
         this._dateMenu._sessionUpdated();
@@ -426,6 +450,15 @@ export default class TodoistCalendarExtension extends Extension {
         this._dateMenu = null;
         this.settings = null;
         this.state = null;
+    }
+
+    // The theme draws light dots in dark mode and dark ones in light mode.
+    _syncStyleVariant() {
+        const calendar = this._dateMenu._calendar;
+        if (Main.getStyleVariant() === 'light')
+            calendar.add_style_class_name('todoist-calendar-light');
+        else
+            calendar.remove_style_class_name('todoist-calendar-light');
     }
 
     _schedule() {

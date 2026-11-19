@@ -5,7 +5,8 @@ Private GNOME Shell extension, for GNOME 51, that puts your Todoist tasks in the
 - **Calendar dots** mark days with tasks due, not days with events.
 - **The events card becomes a checklist** for the selected day. On today it lists overdue tasks first, as Todoist's Today view does. Each row shows the task, then its time (if it has one), its project, and for overdue tasks the date it was due. Subtasks sit indented under their parent. Check-box rings use Todoist's priority colors: red p1, orange p2, blue p3.
 - **Ticking a task completes it** in Todoist, and Planify (or any other Todoist client) picks it up on its next sync. Ticked tasks stay in the list, struck through, until the menu closes, so a mis-tick can be unticked. A recurring task can't be unticked here, because Todoist has already moved it to its next date.
-- **Every task is listed.** The list has no cap: the date menu grows to the screen height, then its right column scrolls.
+- **Every task is listed.** The list has no cap: the date menu grows to fit the selected day's list (stock GNOME keeps it at today's size, so other days' lists get cut off), up to the screen height, then its right column scrolls.
+- **Day dots sit a little higher** than the theme's, so they don't run into the ring around the selected day.
 - Clicking the card's title ("Today") opens Planify if it's installed, else the Todoist app, else Todoist on the web.
 
 Calendar events from Evolution Data Server no longer show in the date menu while the extension is enabled. Disabling it puts the stock event source back.
@@ -30,3 +31,5 @@ The extension relies on these GNOME Shell 51 internals (`ui/dateMenu.js`). Check
 - `DateMenuButton._getEventSource()` is overridden on the instance to return a task-backed `Calendar.EventSourceBase`, and `_sessionUpdated()` re-applies it. Disabling deletes the override and calls `_sessionUpdated()` again.
 - The source reports `hasCalendars = false`, which keeps the stock `_eventsItem` card hidden. The checklist card is inserted next to it in the displays box and reuses its style classes.
 - It listens to the calendar's `selected-date-changed` signal and the menu's `open-state-changed` signal.
+- On `selected-date-changed` it sets `frozen = false` on the menu's `FreezableBinLayout` (the layout manager three parents up from `_calendar`), after the date menu's own handler has frozen it for a day other than today.
+- It adds `todoist-calendar-dots` (and `todoist-calendar-light` when `Main.getStyleVariant()` is `light`) to `_calendar`, to override the theme's `.calendar-day-with-events` background image.
