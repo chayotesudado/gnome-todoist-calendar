@@ -1,0 +1,9 @@
+{
+  "uuid": "todoist-calendar@chayotesudado",
+  "name": "Todoist Calendar",
+  "description": "Todoist tasks in the clock's date menu: dots on days with tasks due, and a checklist of the day's tasks (with overdue ones on today) in place of calendar events.",
+  "shell-version": ["51"],
+  "settings-schema": "org.gnome.shell.extensions.todoist-calendar",
+  "gettext-domain": "todoist-calendar",
+  "version-name": "1.0.0"
+}

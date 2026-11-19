@@ -1,0 +1,43 @@
+/* Todoist Calendar. The card reuses the stock events card's classes
+   (.events-button, .events-box, .events-title, .events-list,
+   .event-placeholder), so it follows the shell theme in light and dark.
+   Only the check boxes' priority colors and spacing are added here. */
+
+.todoist-calendar .todoist-calendar-list {
+    spacing: 8px;
+}
+
+/* "Overdue" / "Today" when both groups show. */
+.todoist-calendar .todoist-calendar-group {
+    font-size: 0.818em;
+    font-weight: bold;
+    padding-top: 4px;
+}
+.todoist-calendar .todoist-calendar-group:first-child {
+    padding-top: 0;
+}
+
+.todoist-calendar .check-box StLabel {
+    font-weight: normal;
+}
+
+.todoist-calendar-title:hover,
+.todoist-calendar-link:hover {
+    text-decoration: underline;
+}
+
+/* Priority rings, as Todoist draws them (GNOME palette). */
+.todoist-calendar .check-box.todoist-p1 StIcon {
+    border-color: #f66151; /* Red 1 */
+}
+.todoist-calendar .check-box.todoist-p2 StIcon {
+    border-color: #ffa348; /* Orange 1 */
+}
+.todoist-calendar .check-box.todoist-p3 StIcon {
+    border-color: #62a0ea; /* Blue 1 */
+}
+.todoist-calendar .check-box.todoist-p1:checked StIcon,
+.todoist-calendar .check-box.todoist-p2:checked StIcon,
+.todoist-calendar .check-box.todoist-p3:checked StIcon {
+    border-color: transparent;
+}

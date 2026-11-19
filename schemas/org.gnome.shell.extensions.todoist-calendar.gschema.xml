@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="todoist-calendar">
+  <schema id="org.gnome.shell.extensions.todoist-calendar" path="/org/gnome/shell/extensions/todoist-calendar/">
+    <key name="show-overdue" type="b">
+      <default>true</default>
+      <summary>Show overdue tasks</summary>
+      <description>On today, list overdue tasks before today’s, as Todoist’s Today view does.</description>
+    </key>
+    <key name="refresh-minutes" type="u">
+      <range min="1" max="60"/>
+      <default>5</default>
+      <summary>Refresh interval</summary>
+      <description>Minutes between task updates. Opening the date menu also updates, at most every 30 seconds.</description>
+    </key>
+    <key name="token-serial" type="u">
+      <default>0</default>
+      <summary>Token change counter</summary>
+      <description>Bumped by Preferences when the API token in the keyring changes, so the extension re-reads it. Holds no secret.</description>
+    </key>
+  </schema>
+</schemalist>
